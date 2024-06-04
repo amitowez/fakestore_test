@@ -1,32 +1,48 @@
-import { useDispatch, useSelector } from "react-redux"
+// import { useDispatch, useSelector } from "react-redux"
 import { fetchCategoryes } from "../../store/asyncActions/categoryes"
 import { setActiveCategory } from "../../store/actionCreators/actionCreatorActiveCategory";
-import { useEffect } from 'react';
+import { Component, useEffect } from 'react';
+import { connect } from 'react-redux'
 
-export const OptionPanel = () => {
-    const categoryes = useSelector(state => state.categoryes)
-    const dispatch = useDispatch()
-    useEffect(()=>{
-      dispatch(fetchCategoryes())
-      // eslint-disable-next-line
-    }, [])
-    useEffect(()=>{
-        console.log(categoryes)
-      }, [categoryes])
-    const selectHadler = (event) => {
-        dispatch(setActiveCategory(event.target.value))
+
+
+class OptionPanel extends Component{
+    componentDidMount(){
+        this.props.categoryes()
     }
-    if(categoryes[0]){
-        return (
-            <select onChange={selectHadler}>
-                <option value={'all'}  >все</option> 
-                {categoryes.map(category => <option value={category}>{category}</option>)}
-            </select>
-        )
-    } 
+     selectHadler = (event) => {
+        this.props.setCategory(event.target.value)
+    }
+    render(){
 
-    return (
-        <span>Грузим</span>
-    )
+        if(this.props.categoryesData){
+            return (
+                <select onChange={this.selectHadler}>
+                    <option value={'all'}  >все</option> 
+                    {this.props.categoryesData.map(category => <option value={category}>{category}</option>)}
+                </select>
+            ) 
+        }
+    }
 
 }
+
+const mapStateToProps = (state) => {
+    return {
+      categoryesData: state.categoryes
+    };
+  }
+  
+  
+  const mapDispatchToProps = (dispatch) => {
+    return {
+      categoryes: () => dispatch(fetchCategoryes()),
+      setCategory: (data) =>  dispatch(setActiveCategory(data))
+    }
+  }
+
+
+
+export default connect(mapStateToProps, mapDispatchToProps)(OptionPanel);
+
+
